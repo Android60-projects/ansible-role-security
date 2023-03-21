@@ -1,0 +1,16 @@
+---
+- name: reboot system
+  reboot:
+    msg: "Restart system"
+
+- name: restart ssh
+  service: name=sshd state=restarted
+
+- name: restart fail2ban
+  service: name=fail2ban state=restarted
+
+- name: reload ufw
+  service: name=ufw state=restarted
+
+- name: restart firewalld
+  command: firewall-cmd --reload

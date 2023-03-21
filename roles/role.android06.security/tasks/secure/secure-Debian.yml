@@ -1,0 +1,95 @@
+---
+- name: Update SSH configuration to be more secure.
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -t -f %s'
+  with_items:
+    - regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication no"
+  notify: restart ssh
+
+- name: Update and upgrade apt packages.
+  when: upgrade_packages == true
+  tags: notest
+  apt:
+    update_cache: true
+    upgrade: true
+    cache_valid_time: 86400
+
+- name: Ensure UFW is insalled.
+  apt:
+    name: ufw
+    state: present
+
+- name: Open SSH port
+  ufw:
+    rule: allow
+    direction: in
+    proto: "tcp"
+    port: "22"
+    comment: Created by Ansible
+    state: enabled
+    delete: false
+  notify: reload ufw
+
+# Remove unused software, open only required ports.
+- name: Remove unused packages.
+  package:
+    name:
+      - nano
+      - sendmail
+    state: absent
+
+# Automating updates for Debian systems.
+- name: Install unattended upgrades package.
+  apt:
+    name: unattended-upgrades
+    state: present
+
+- name: Copy unattended-upgrades configuration files in place.
+  template:
+    src: "../templates/{{ item }}.j2"
+    dest: "/etc/apt/apt.conf.d/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - 20auto-upgrades
+    - 50unattended-upgrades
+
+- name: Install fail2ban (Debian).
+  apt:
+    name: fail2ban
+    state: present
+
+- name: Ensure fail2ban is running and enabled on boot.
+  service:
+    name: fail2ban
+    state: started
+    enabled: true
+
+- name: Ensure UFW is running and enabled on boot.
+  service:
+    name: ufw
+    state: started
+    enabled: true
+
+- name: Count sshd jails
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o pipefail
+    set -o nounset
+    fail2ban-client status | grep "sshd" | wc -l
+    exit 0
+  args:
+    executable: "/bin/bash"
+  register: sshd_jail_count
+  changed_when: false
+
+- name: There should be at least one sshd jail
+  ansible.builtin.assert:
+    that:
+      - "sshd_jail_count.stdout|int > 0"

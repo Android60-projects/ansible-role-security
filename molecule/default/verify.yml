@@ -1,0 +1,24 @@
+---
+- name: Verify
+  hosts: all
+
+  tasks:
+    - name: Verify that firewalld is running and enabled
+      when: ansible_os_family == 'RedHat'
+      systemd:
+        name: firewalld
+        enabled: true
+        state: started
+      check_mode: true
+      register: firewalld_service
+      failed_when: firewalld_service is changed
+
+    - name: Verify that UFW is running and enabled
+      when: ansible_os_family == 'Debian'
+      systemd:
+        name: ufw
+        enabled: true
+        state: started
+      check_mode: true
+      register: ufw_service
+      failed_when: ufw_service is changed

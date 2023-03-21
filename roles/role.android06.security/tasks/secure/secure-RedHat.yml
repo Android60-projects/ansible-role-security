@@ -1,0 +1,122 @@
+---
+- name: Update SSH configuration to be more secure.
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -t -f %s'
+  with_items:
+    - regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication no"
+  notify: restart ssh
+
+- name: Upgrade all packages
+  tags: notest
+  when: upgrade_packages == true
+  dnf:
+    name: '*'
+    state: latest
+    nobest: true
+
+# Remove unused software, open only required ports.
+- name: Remove unused packages.
+  package:
+    name:
+      - nano
+      - sendmail
+    state: absent
+
+# Automating updates for RHEL systems.
+- name: Install dnf-automatic.
+  when: ansible_distribution != "Amazon"
+  dnf:
+    name: dnf-automatic
+    state: present
+
+- name: Ensure dnf-automatic is running and enabled on boot.
+  when: ansible_distribution != "Amazon"
+  service:
+    name: dnf-automatic-install.timer
+    state: started
+    enabled: true
+
+- name: Install firewalld
+  dnf:
+    name: firewalld
+    state: present
+
+# Configuring a firewall with `firewalld` on RHEL.
+- name: Ensure firewalld is running and enabled.
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Open SSH port
+  notify:
+    - restart firewalld
+  firewalld:
+    state: "enabled"
+    port: "22/tcp"
+    zone: "public"
+    immediate: true
+    permanent: true
+
+- name: Install fail2ban (RedHat).
+  dnf:
+    name: fail2ban
+    state: present
+    enablerepo: epel
+
+- name: Enable sshd jail in fail2ban config
+  notify:
+    - restart fail2ban
+  ansible.builtin.template:
+    src: fail2ban-rhel.conf.j2
+    dest: "/etc/fail2ban/jail.d/defaults-rhel.conf"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Ensure fail2ban is running and enabled on boot.
+  service:
+    name: fail2ban
+    state: started
+    enabled: true
+
+# Use SELinux (Security-Enhanced Linux).
+- name: Install Python SELinux library (AL2).
+  when: ansible_distribution == "Amazon"
+  package:
+    name: libselinux-python
+    state: present
+
+# Use SELinux (Security-Enhanced Linux).
+- name: Install Python SELinux library.
+  when: ansible_distribution != "Amazon"
+  package:
+    name: python3-libselinux
+    state: present
+
+- name: Ensure SELinux is enabled in `targeted` mode.
+  selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Count sshd jails
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o pipefail
+    set -o nounset
+    fail2ban-client status | grep "sshd" | wc -l
+    exit 0
+  args:
+    executable: "/bin/bash"
+  register: sshd_jail_count
+  changed_when: false
+
+- name: There should be at least one sshd jail
+  ansible.builtin.assert:
+    that:
+      - "sshd_jail_count.stdout|int > 0"
