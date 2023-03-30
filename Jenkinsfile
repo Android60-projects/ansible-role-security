@@ -12,24 +12,55 @@ pipeline {
     }
 
     stages {
-        stage('Test'){
-            agent { label 'molecule-virtualbox' }
-            steps {
-                script {
-                    sh "VAGRANT_DEFAULT_PROVIDER=virtualbox molecule test"
+        stage('Test I') {
+            parallel {
+                stage('Test Ubuntu 20.04'){
+                    agent { label 'molecule-virtualbox' }
+                    steps {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            retry(5) {
+                                // retry code block
+                                script {
+                                    sh "MOLECULE_DISTRO=geerlingguy/ubuntu2004 molecule test --parallel"
+                                }
+                            }
+                        }
+                    }
+
+                post {
+                    success {
+                        updateGitlabCommitStatus name: 'Test Ubuntu 20.04', state: 'success'
+                    }
+                    failure {
+                        updateGitlabCommitStatus name: 'Test Ubuntu 20.04', state: 'failed'
+                    }
+                } 
+                }
+                stage('Test Rocky Linux 8'){
+                    agent { label 'molecule-virtualbox' }
+                    steps {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            retry(5) {
+                                // retry code block
+                                script {
+                                    sh "MOLECULE_DISTRO=geerlingguy/rockylinux8 molecule test --parallel"
+                                }
+                            }
+                        }
+                    }
+                    post {
+                        success {
+                            updateGitlabCommitStatus name: 'Test Rocky Linux 8', state: 'success'
+                        }
+                        failure {
+                            updateGitlabCommitStatus name: 'Test Rocky Linux 8', state: 'failed'
+                        }
+                    } 
                 }
             }
-
-        post {
-            success {
-                updateGitlabCommitStatus name: 'Test', state: 'success'
-            }
-            failure {
-                updateGitlabCommitStatus name: 'Test', state: 'failed'
-            }
-        } 
         }
     }
+        
     post {
         success {
             updateGitlabCommitStatus name: 'Pipeline', state: 'success'
@@ -38,4 +69,5 @@ pipeline {
             updateGitlabCommitStatus name: 'Pipeline', state: 'failed'
         }
     } 
-}
+ }
+

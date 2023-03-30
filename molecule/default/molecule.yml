@@ -13,20 +13,8 @@ driver:
   parallel: true
   provision: yes
 platforms:
-  - name: test-wg-ubuntu2004
-    box: geerlingguy/ubuntu2004
-    memory: 1024
-    cpus: 1
-  # - name: test-wg-ubuntu1804
-  #   box: geerlingguy/ubuntu1804
-  #   memory: 1024
-  #   cpus: 1
-  # - name: test-wg-debian11
-  #   box: geerlingguy/debian11
-  #   memory: 1024
-  #   cpus: 1
-  - name: test-wg-rocky8
-    box: geerlingguy/rockylinux8
+  - name: test-secure-vm
+    box: ${MOLECULE_DISTRO:-geerlingguy/ubuntu2004}
     memory: 1024
     cpus: 1
 provisioner:
