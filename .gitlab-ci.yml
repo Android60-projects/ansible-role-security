@@ -21,7 +21,7 @@ rocky-linux-8-test-job:   # This job also runs in the test stage.
     stage: test
     retry: 2
     before_script:
-        - export PATH=$$PATH:$$HOME/.local/bin
+        - export PATH=$PATH:$HOME/.local/bin
         - echo $PATH
     script:
         - echo "Testing role with molecule"
