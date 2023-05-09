@@ -7,7 +7,7 @@ stages:          # List of stages for jobs, and their order of execution
   - test
 
 variables:
-    PATH: "$HOME/.local/bin:$PATH"
+    PATH: "$$HOME/.local/bin:$$PATH"
     
 
 
