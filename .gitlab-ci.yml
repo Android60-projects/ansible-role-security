@@ -11,6 +11,7 @@ ubuntu2004-test-job:   # This job runs in the test stage.
     retry: 2
     before_script:
         - export PATH=$PATH:$HOME/.local/bin
+        - echo $PATH
     script:
         - echo "Testing role with molecule"
         - MOLECULE_DISTRO=geerlingguy/ubuntu2004 molecule test --parallel
@@ -21,6 +22,7 @@ rocky-linux-8-test-job:   # This job also runs in the test stage.
     retry: 2
     before_script:
         - export PATH=$PATH:$HOME/.local/bin
+        - echo $PATH
     script:
         - echo "Testing role with molecule"
         - MOLECULE_DISTRO=geerlingguy/rockylinux8 molecule test --parallel
