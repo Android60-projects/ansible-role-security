@@ -1,0 +1,24 @@
+---
+default:
+    tags:
+        - molecule-vagrant
+
+stages:          # List of stages for jobs, and their order of execution
+  - test
+
+
+ubuntu2004-test-job:   # This job runs in the test stage.
+    stage: test
+    retry: 2
+    script:
+        - echo "Testing role with molecule"
+        - MOLECULE_DISTRO=geerlingguy/ubuntu2004 molecule test --parallel
+        - echo "No issues found."
+
+rocky-linux-8-test-job:   # This job also runs in the test stage.
+    stage: test
+    retry: 2
+    script:
+        - echo "Testing role with molecule"
+        - MOLECULE_DISTRO=geerlingguy/rockylinux8 molecule test --parallel
+        - echo "No issues found."
