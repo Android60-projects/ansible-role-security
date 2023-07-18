@@ -64,12 +64,14 @@
     permanent: true
 
 - name: Install fail2ban (RedHat).
+  when: install_fail2ban | bool
   dnf:
     name: fail2ban
     state: present
     enablerepo: epel
 
 - name: Enable sshd jail in fail2ban config
+  when: install_fail2ban | bool
   notify:
     - restart fail2ban
   ansible.builtin.template:
@@ -80,6 +82,7 @@
     mode: "0640"
 
 - name: Ensure fail2ban is running and enabled on boot.
+  when: install_fail2ban | bool
   service:
     name: fail2ban
     state: started
@@ -94,17 +97,20 @@
 
 # Use SELinux (Security-Enhanced Linux).
 - name: Install Python SELinux library.
+  when: activate_selinux | bool
   when: ansible_distribution != "Amazon"
   package:
     name: python3-libselinux
     state: present
 
 - name: Ensure SELinux is enabled in `targeted` mode.
+  when: activate_selinux | bool
   selinux:
     policy: targeted
     state: enforcing
 
 - name: Count sshd jails
+  when: install_fail2ban | bool
   ansible.builtin.shell: |
     set -o errexit
     set -o pipefail
@@ -117,6 +123,7 @@
   changed_when: false
 
 - name: There should be at least one sshd jail
+  when: install_fail2ban | bool
   ansible.builtin.assert:
     that:
       - "sshd_jail_count.stdout|int > 0"
