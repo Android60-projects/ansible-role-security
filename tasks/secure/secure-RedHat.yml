@@ -63,6 +63,18 @@
     immediate: true
     permanent: true
 
+- name: Open custom ports
+  notify:
+    - restart firewalld
+  firewalld:
+    state: "enabled"
+    port: "{{ item.port }}/{{ item.proto }}"
+    zone: "public"
+    immediate: true
+    permanent: true
+  when: security_open_ports is defined
+  with_items: "{{ security_open_ports }}"
+
 - name: Install fail2ban (RedHat).
   when: install_fail2ban | bool
   dnf:

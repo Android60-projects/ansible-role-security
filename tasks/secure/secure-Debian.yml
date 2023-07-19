@@ -35,6 +35,19 @@
     delete: false
   notify: reload ufw
 
+- name: Open custom ports
+  ufw:
+    rule: "{{ item.rule }}"
+    direction: "{{ item.direction }}"
+    proto: "{{ item.proto }}"
+    port: "{{ item.port }}"
+    comment: Created by Ansible (security_open_ports)
+    state: enabled
+    delete: false
+  notify: reload ufw
+  when: security_open_ports is defined
+  with_items: "{{ security_open_ports }}"
+
 # Remove unused software, open only required ports.
 - name: Remove unused packages.
   package:
