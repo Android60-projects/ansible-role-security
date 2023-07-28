@@ -110,7 +110,6 @@
 # Use SELinux (Security-Enhanced Linux).
 - name: Install Python SELinux library.
   when: activate_selinux | bool
-  when: ansible_distribution != "Amazon"
   package:
     name: python3-libselinux
     state: present
