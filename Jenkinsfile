@@ -8,7 +8,6 @@ void setBuildStatus(String message, String state) {
   ]);
 }
 
-
 pipeline {
     agent {
         node {
