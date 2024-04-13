@@ -14,7 +14,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: [self-hosted, virtualbox, molecule]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Add ~/.local/bin to GITHUB_PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Run molecule test
@@ -23,7 +23,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: [self-hosted, virtualbox, molecule]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Add ~/.local/bin to GITHUB_PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Run molecule test
