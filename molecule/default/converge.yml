@@ -10,4 +10,4 @@
       when: ansible_os_family == 'Debian'
 
   roles:
-    - role: security-ansible
+    - role: ansible-role-security
