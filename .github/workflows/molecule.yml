@@ -15,6 +15,8 @@ jobs:
     runs-on: [self-hosted, virtualbox, molecule]
     steps:
       - uses: actions/checkout@v3
+      - name: Add ~/.local/bin to PATH
+        run: export PATH=$PATH:$HOME/.local/bin
       - name: Run molecule test
         run: MOLECULE_DISTRO=geerlingguy/ubuntu2004 molecule test --parallel
   Test-Rocky-Linux-8:
@@ -22,5 +24,7 @@ jobs:
     runs-on: [self-hosted, virtualbox, molecule]
     steps:
       - uses: actions/checkout@v3
+      - name: Add ~/.local/bin to PATH
+        run: export PATH=$PATH:$HOME/.local/bin
       - name: Run molecule test
         run: MOLECULE_DISTRO=geerlingguy/rockylinux8 molecule test --parallel
