@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Test-Ubuntu-20.04:
+  Test-Ubuntu-2004:
     # The type of runner that the job will run on
     runs-on: [self-hosted, virtualbox, molecule]
     steps:
