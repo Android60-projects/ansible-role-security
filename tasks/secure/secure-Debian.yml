@@ -11,6 +11,10 @@
       line: "PasswordAuthentication no"
   notify: restart ssh
 
+# Check for unattended-upgrades
+- name: Wait for /var/lib/dpkg/lock-frontend to be released 
+  shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
 - name: Update and upgrade apt packages.
   when: upgrade_packages == true
   tags: notest
