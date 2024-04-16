@@ -13,6 +13,7 @@
 
 # Check for unattended-upgrades
 - name: Wait for automatic system updates to complete
+  tags: molecule-idempotence-notest
   shell:  while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
 
 - name: Update and upgrade apt packages.
